@@ -62,7 +62,7 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = ["domain.users"]
 
 INSTALLED_APPS = DJANGO_CORE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
@@ -156,7 +156,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_URL)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "users.User"
 
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
@@ -196,9 +196,6 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # PAYMENT SETTINGS
 # PAYMENT_PROVIDER = "djlodging.infrastructure.providers.payments.StripePaymentProvider"
-STRIPE_LIVE_SECRET_KEY = env.str("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
-STRIPE_TEST_SECRET_KEY = env.str("STRIPE_TEST_SECRET_KEY", "<your secret key>")
-STRIPE_API_KEY = STRIPE_TEST_SECRET_KEY if DEBUG else STRIPE_LIVE_SECRET_KEY
 STRIPE_LIVE_MODE = False  # Change to True in production
 # DJSTRIPE_WEBHOOK_SECRET = env.str("DJSTRIPE_WEBHOOK_SECRET")
 DJSTRIPE_USE_NATIVE_JSONFIELD = True  # We recommend setting to True for new installations

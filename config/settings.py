@@ -191,7 +191,7 @@ SECURITY_TOKEN_LIFE_TIME_IN_HOURS = env.int("SECURITY_TOKEN_LIFE_TIME_IN_HOURS",
 # EMAIL SETTINGS
 EMAIL_BACKEND = env.str("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="example@example.com")
-EMAIL_PROVIDER = env.str("EMAIL_PROVIDER", default="shared.email_service.BaseEmailService")
+EMAIL_SERVICE = env.str("EMAIL_SERVICE", default="shared.email_service.DummyEmailService")
 
 
 # CELERY SETTINGS

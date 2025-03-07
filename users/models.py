@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator
 from django.db import models
 
-from core.base_model import BaseModel
+from shared.base_model import BaseModel
 
 
 class User(AbstractUser, BaseModel):

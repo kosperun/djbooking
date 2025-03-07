@@ -1,8 +1,6 @@
 # dj-booking
 
-A Django backend for a lodging reservation application, inspired by `booking.com`.
-
-An experiment in using Django with Domain-Driven Design (DDD) principles while incorporating some of the best practices from the [HackSoft Django Styleguide](https://github.com/HackSoftware/Django-Styleguide).
+A Django backend for a lodging reservation application, inspired by `booking.com`. Incorporates some of the best practices from the [HackSoft Django Styleguide](https://github.com/HackSoftware/Django-Styleguide).
 
 Tech Stack
 Core Frameworks & Libraries

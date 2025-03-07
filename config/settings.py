@@ -151,6 +151,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_URL)
 
+DOMAIN = "https://djbooking.com"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -165,6 +167,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGE_SIZE": 1,
+    "EXCEPTION_HANDLER": "config.exception_handlers.djbooking_exception_handler",
 }
 
 
@@ -188,6 +191,8 @@ SECURITY_TOKEN_LIFE_TIME_IN_HOURS = env.int("SECURITY_TOKEN_LIFE_TIME_IN_HOURS",
 # EMAIL SETTINGS
 EMAIL_BACKEND = env.str("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="example@example.com")
+EMAIL_PROVIDER = env.str("EMAIL_PROVIDER", default="shared.email_service.BaseEmailService")
+
 
 # CELERY SETTINGS
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL")

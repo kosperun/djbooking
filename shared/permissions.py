@@ -7,4 +7,4 @@ class IsPartner(BasePermission):
     """
 
     def has_permission(self, request, view) -> bool:
-        return bool(request.user and hasattr(request.user, "is_partner") and request.user.is_partner)
+        return request.user and hasattr(request.user, "is_partner") and request.user.is_partner

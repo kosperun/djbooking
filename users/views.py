@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from rest_framework.views import APIView
 
+from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
 from users.services import user_create
 
@@ -75,5 +76,7 @@ class UserGetByTokenAndEmailAPIView(APIView):
     def get(self, request):
         token = request.query_params.get("token")
         email = request.query_params.get("email")
+        if not (token and email):
+            raise MissingTokenOrEmail()
         user = get_user_by_security_token_and_email(token, email)
         return Response({"user_id": user.id}, status=HTTP_200_OK)

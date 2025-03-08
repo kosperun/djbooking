@@ -2,4 +2,8 @@ from shared.exceptions import DjBookingAPIError
 
 
 class UserDoesNotExist(DjBookingAPIError):
-    detail = "Such user does not exist"
+    default_detail = "Such user does not exist"
+
+
+class MissingTokenOrEmail(DjBookingAPIError):
+    default_detail = "Token and/or email is missing"

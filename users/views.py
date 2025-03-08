@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
-from users.services import user_create
+from users.services import confirm_registration, user_create
 
 
 class UserSingUpAPIView(APIView):
@@ -80,3 +80,26 @@ class UserGetByTokenAndEmailAPIView(APIView):
             raise MissingTokenOrEmail()
         user = get_user_by_security_token_and_email(token, email)
         return Response({"user_id": user.id}, status=HTTP_200_OK)
+
+
+class UserRegistrationConfirmAPIView(APIView):
+    authentication_classes = ()
+    permission_classes = ()
+
+    class InputSerializer(serializers.Serializer):
+        user_id = serializers.UUIDField()
+        security_token = serializers.UUIDField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={
+            200: None,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Confirm registration",
+    )
+    def post(self, request):
+        incoming_data = self.InputSerializer(data=request.data)
+        incoming_data.is_valid(raise_exception=True)
+        confirm_registration(**incoming_data.validated_data)
+        return Response(status=HTTP_200_OK)

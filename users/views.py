@@ -4,6 +4,8 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
@@ -103,3 +105,16 @@ class UserRegistrationConfirmAPIView(APIView):
         incoming_data.is_valid(raise_exception=True)
         confirm_registration(**incoming_data.validated_data)
         return Response(status=HTTP_200_OK)
+
+
+class UserLoginAPIView(TokenViewBase):
+    class UserLoginOutputSerializer(TokenObtainPairSerializer):
+        def validate(self, attrs):
+            data = super().validate(attrs)
+            data["username"] = self.user.full_name
+            data["user_id"] = self.user.id
+            data["is_user"] = self.user.is_user
+            data["is_partner"] = self.user.is_partner
+            return data
+
+    serializer_class = UserLoginOutputSerializer

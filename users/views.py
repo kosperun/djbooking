@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
@@ -126,6 +127,13 @@ class UserLoginAPIView(TokenViewBase):
             return data
 
     serializer_class = UserLoginOutputSerializer
+
+
+class BlacklistRefreshView(APIView):
+    def post(self, request):
+        token = RefreshToken(request.data.get("refresh"))
+        token.blacklist()
+        return Response(status=HTTP_200_OK)
 
 
 class PasswordChangeAPIView(APIView):

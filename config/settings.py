@@ -55,6 +55,7 @@ THIRD_PARTY_APPS = [
     # "health_check.contrib.redis",  # requires Redis broker
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_filters",
     "silk",

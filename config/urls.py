@@ -20,15 +20,17 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.router import urlpatterns as api_urlpatterns
+from users.views import BlacklistRefreshView, UserLoginAPIView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", include("health_check.urls")),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/login/", UserLoginAPIView.as_view(), name="login"),
+    path("api/logout/", BlacklistRefreshView.as_view(), name="logout"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/", include(api_urlpatterns)),
     # Swagger

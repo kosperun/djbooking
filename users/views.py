@@ -1,6 +1,7 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import serializers
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED
 from rest_framework.views import APIView
@@ -17,6 +18,7 @@ from users.services import (
     confirm_reset_password,
     send_change_email_link,
     send_forgot_password_link,
+    update_user,
     user_create,
 )
 
@@ -244,3 +246,63 @@ class EmailChangeConfirmAPIView(APIView):
         input_serializer.is_valid(raise_exception=True)
         change_email(**input_serializer.validated_data)
         return Response(status=HTTP_200_OK)
+
+
+class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    class InputSerializer(serializers.Serializer):
+        username = serializers.CharField(required=False)
+        first_name = serializers.CharField(required=False)
+        last_name = serializers.CharField(required=False)
+        phone_number = serializers.CharField(required=False)
+        date_of_birth = serializers.DateField(required=False)
+        nationality = serializers.CharField(required=False)
+        gender = serializers.CharField(required=False)
+
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.UUIDField()
+        email = serializers.EmailField()
+        username = serializers.CharField()
+        first_name = serializers.CharField()
+        last_name = serializers.CharField()
+        phone_number = serializers.CharField()
+        date_of_birth = serializers.DateField()
+        nationality = serializers.CharField()
+        gender = serializers.CharField()
+        is_superuser = serializers.BooleanField()
+        is_staff = serializers.BooleanField()
+        is_user = serializers.BooleanField()
+        is_partner = serializers.BooleanField()
+
+    @extend_schema(
+        request=None,
+        responses={
+            200: OutputSerializer,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        methods=["GET"],
+        description="Allow a user to retrieve their own profile.",
+        summary="Get my details",
+    )
+    @extend_schema(
+        request=InputSerializer,
+        responses={
+            200: OutputSerializer,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        methods=["PATCH"],
+        description="Allow a user to update their own profile.",
+        summary="Update my details",
+    )
+    def get(self, request):
+        """
+        Allow a user to retrieve their own profile.
+        """
+        output_serializer = self.OutputSerializer(request.user)
+        return Response(output_serializer.data, status=HTTP_200_OK)
+
+    def patch(self, request):
+        incoming_data = self.InputSerializer(data=request.data)
+        incoming_data.is_valid(raise_exception=True)
+        user = update_user(user=request.user, **incoming_data.validated_data)
+        output_serializer = self.OutputSerializer(user)
+        return Response(output_serializer.data, status=HTTP_200_OK)

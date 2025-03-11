@@ -8,6 +8,7 @@ from users.views import (
     SendForgotPasswordLinkAPIView,
     UserGetByTokenAndEmailAPIView,
     UserRegistrationConfirmAPIView,
+    UserRetrieveUpdateAPIView,
     UserSingUpAPIView,
 )
 
@@ -22,4 +23,5 @@ urlpatterns = [
     path("password-reset-confirmation/", PasswordResetConfirmAPIView.as_view(), name="confirm-reset-password"),
     path("email-change-request/", EmailChangeRequestAPIView.as_view(), name="request-change-email"),
     path("email-change-confirm/", EmailChangeConfirmAPIView.as_view(), name="confirm-change-email"),
+    path("", UserRetrieveUpdateAPIView.as_view(), name="retrieve-update-user"),
 ]

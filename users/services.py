@@ -82,3 +82,10 @@ def change_email(security_token: UUID, new_email: str) -> None:
     user.email = new_email
     user.security_token = ""
     user.save()
+
+
+def update_user(user: UserModel, **kwargs) -> UserModel:
+    for field, value in kwargs.items():
+        setattr(user, field, value)
+    user.save()
+    return user

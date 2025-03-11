@@ -9,7 +9,7 @@ from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
-from users.services import confirm_registration, user_create
+from users.services import change_password, confirm_registration, user_create
 
 
 class UserSingUpAPIView(APIView):
@@ -118,3 +118,23 @@ class UserLoginAPIView(TokenViewBase):
             return data
 
     serializer_class = UserLoginOutputSerializer
+
+
+class PasswordChangeAPIView(APIView):
+    class InputSerializer(serializers.Serializer):
+        old_password = serializers.CharField()
+        new_password = serializers.CharField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={
+            200: None,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Change password",
+    )
+    def patch(self, request):
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        change_password(user=request.user, **input_serializer.validated_data)
+        return Response(status=HTTP_200_OK)

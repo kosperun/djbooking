@@ -15,7 +15,7 @@ def get_user_by_email(email: str) -> UserModel:
         raise UserDoesNotExist()
 
 
-def get_user_by_security_token_and_email(security_token: str, email: str) -> UserModel:
+def get_user_by_security_token_and_email(security_token: UUID | str, email: str) -> UserModel:
     try:
         user = User.objects.get(security_token=security_token, email=email)
     except User.DoesNotExist:
@@ -23,7 +23,7 @@ def get_user_by_security_token_and_email(security_token: str, email: str) -> Use
     return user
 
 
-def get_user_by_id_and_security_token(user_id: UUID, security_token: UUID) -> UserModel:
+def get_user_by_id_and_security_token(user_id: UUID | str, security_token: UUID | str) -> UserModel:
     try:
         user = User.objects.get(id=user_id, security_token=security_token)
     except User.DoesNotExist:

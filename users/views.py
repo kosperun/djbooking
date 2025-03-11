@@ -9,7 +9,13 @@ from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
-from users.services import change_password, confirm_registration, send_forgot_password_link, user_create
+from users.services import (
+    change_password,
+    confirm_registration,
+    confirm_reset_password,
+    send_forgot_password_link,
+    user_create,
+)
 
 
 class UserSingUpAPIView(APIView):
@@ -160,3 +166,35 @@ class SendForgotPasswordLinkAPIView(APIView):
         incoming_data.is_valid(raise_exception=True)
         send_forgot_password_link(**incoming_data.validated_data)
         return Response(status=HTTP_202_ACCEPTED)
+
+
+class PasswordResetConfirmAPIView(APIView):
+    """
+    This is the second step of 'forgot password' flow.
+    This API should be used after SendForgotPasswordLinkAPIView where a token is sent
+    to an email specified by user.
+
+    After a user resets their password via this API they should be logged in via UserLoginAPI.
+    """
+
+    permission_classes = ()
+    authentication_classes = ()
+
+    class InputSerializer(serializers.Serializer):
+        security_token = serializers.UUIDField()
+        email = serializers.EmailField()
+        new_password = serializers.CharField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={
+            200: None,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Confirm resetting password after forgetting",
+    )
+    def post(self, request):
+        incoming_data = self.InputSerializer(data=request.data)
+        incoming_data.is_valid(raise_exception=True)
+        confirm_reset_password(**incoming_data.validated_data)
+        return Response(status=HTTP_200_OK)

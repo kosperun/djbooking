@@ -15,6 +15,10 @@ class BaseEmailService(ABC):
     def send_confirmation_link(self, *, email: str, link: str):
         pass
 
+    @abstractmethod
+    def send_change_password_link(self, *, email: str, link: str):
+        pass
+
 
 class DummyEmailService(BaseEmailService):
     """Dummy EmailService class"""
@@ -24,6 +28,9 @@ class DummyEmailService(BaseEmailService):
 
     def send_confirmation_link(self, *, email: str, link: str):
         print("Confirmation Link Sent!")
+
+    def send_change_password_link(self, *, email: str, link: str):
+        print("Password Link Sent!")
 
 
 EmailService = import_string(settings.EMAIL_SERVICE)()

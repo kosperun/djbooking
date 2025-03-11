@@ -2,14 +2,14 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
-from users.services import change_password, confirm_registration, user_create
+from users.services import change_password, confirm_registration, send_forgot_password_link, user_create
 
 
 class UserSingUpAPIView(APIView):
@@ -138,3 +138,25 @@ class PasswordChangeAPIView(APIView):
         input_serializer.is_valid(raise_exception=True)
         change_password(user=request.user, **input_serializer.validated_data)
         return Response(status=HTTP_200_OK)
+
+
+class SendForgotPasswordLinkAPIView(APIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    class InputSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={
+            202: None,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Send forgot password link",
+    )
+    def post(self, request):
+        incoming_data = self.InputSerializer(data=request.data)
+        incoming_data.is_valid(raise_exception=True)
+        send_forgot_password_link(**incoming_data.validated_data)
+        return Response(status=HTTP_202_ACCEPTED)

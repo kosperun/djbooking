@@ -17,3 +17,10 @@ def send_confirmation_link(email: str, security_token: str):
 @celery_app.task
 def delete_unregistered_user_after_security_token_expired(user_id: str):
     user_delete_by_id(user_id)
+
+
+@celery_app.task
+def send_change_password_link(email: str, security_token: str):
+    params = {"email": email, "token": security_token}
+    link = f"{settings.DOMAIN}/change-password?{urlencode(params)}"
+    return EmailService.send_change_password_link(email=email, link=link)

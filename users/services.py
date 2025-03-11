@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -8,8 +8,12 @@ from django.utils.timezone import now, timedelta
 from shared.exceptions import DjBookingAPIError
 from users.exceptions import RegistrationTimePassed
 from users.models import User as UserModel
-from users.selectors import get_user_by_id_and_security_token
-from users.tasks import delete_unregistered_user_after_security_token_expired, send_confirmation_link
+from users.selectors import get_user_by_email, get_user_by_id_and_security_token
+from users.tasks import (
+    delete_unregistered_user_after_security_token_expired,
+    send_change_password_link,
+    send_confirmation_link,
+)
 
 User = get_user_model()
 
@@ -44,3 +48,11 @@ def change_password(user: UserModel, old_password: str, new_password: str) -> Us
     user.set_password(new_password)
     user.save()
     return user
+
+
+def send_forgot_password_link(email: str) -> None:
+    user = get_user_by_email(email)
+    security_token = uuid4()
+    user.security_token = security_token
+    user.save()
+    send_change_password_link.delay(user.email, str(security_token))

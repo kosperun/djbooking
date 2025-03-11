@@ -13,6 +13,7 @@ from users.services import (
     change_password,
     confirm_registration,
     confirm_reset_password,
+    send_change_email_link,
     send_forgot_password_link,
     user_create,
 )
@@ -198,3 +199,19 @@ class PasswordResetConfirmAPIView(APIView):
         incoming_data.is_valid(raise_exception=True)
         confirm_reset_password(**incoming_data.validated_data)
         return Response(status=HTTP_200_OK)
+
+
+class EmailChangeRequestAPIView(APIView):
+    class InputSerializer(serializers.Serializer):
+        new_email = serializers.EmailField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={202: None},
+        summary="Send a link to new email",
+    )
+    def post(self, request):
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        send_change_email_link(user=request.user, **input_serializer.validated_data)
+        return Response(status=HTTP_202_ACCEPTED)

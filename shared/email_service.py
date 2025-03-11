@@ -19,6 +19,14 @@ class BaseEmailService(ABC):
     def send_change_password_link(self, *, email: str, link: str):
         pass
 
+    @abstractmethod
+    def send_forgot_password_email(self, *, email: str, username: str, link: str):
+        pass
+
+    @abstractmethod
+    def send_change_email_link(self, *, email: str, link: str):
+        pass
+
 
 class DummyEmailService(BaseEmailService):
     """Dummy EmailService class"""
@@ -31,6 +39,12 @@ class DummyEmailService(BaseEmailService):
 
     def send_change_password_link(self, *, email: str, link: str):
         print("Password Link Sent!")
+
+    def send_forgot_password_email(self, *, email: str, username: str, link: str):
+        print("Email to reset password sent!")
+
+    def send_change_email_link(self, *, email: str, link: str):
+        print("Email to reset email sent!")
 
 
 EmailService = import_string(settings.EMAIL_SERVICE)()

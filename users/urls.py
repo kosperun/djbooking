@@ -1,6 +1,7 @@
 from django.urls import path
 
 from users.views import (
+    EmailChangeRequestAPIView,
     PasswordChangeAPIView,
     PasswordResetConfirmAPIView,
     SendForgotPasswordLinkAPIView,
@@ -20,4 +21,5 @@ urlpatterns = [
     path("password-change/", PasswordChangeAPIView.as_view(), name="change-password"),
     path("password-reset-link/", SendForgotPasswordLinkAPIView.as_view(), name="send-reset-password-link"),
     path("password-reset-confirmation/", PasswordResetConfirmAPIView.as_view(), name="confirm-reset-password"),
+    path("email-change-request/", EmailChangeRequestAPIView.as_view(), name="request-change-email"),
 ]

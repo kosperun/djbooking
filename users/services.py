@@ -63,3 +63,10 @@ def confirm_reset_password(security_token: UUID, email: str, new_password: str) 
     user.security_token = ""
     user.set_password(new_password)
     user.save()
+
+
+def send_change_email_link(user: UserModel, new_email: str) -> None:
+    security_token = uuid4()
+    user.security_token = security_token
+    user.save()
+    send_change_email_link.delay(new_email, str(security_token))

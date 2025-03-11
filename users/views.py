@@ -249,6 +249,8 @@ class EmailChangeConfirmAPIView(APIView):
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    http_method_names = ["get", "patch"]  # Remove PUT from RetrieveUpdateAPIView
+
     class UserRetrieveUpdateInputSerializer(serializers.Serializer):
         username = serializers.CharField(required=False)
         first_name = serializers.CharField(required=False)

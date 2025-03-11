@@ -168,7 +168,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGE_SIZE": 1,
-    "EXCEPTION_HANDLER": "config.exception_handlers.djbooking_exception_handler",
+    "EXCEPTION_HANDLER": "shared.exception_handlers.djbooking_exception_handler",
 }
 
 

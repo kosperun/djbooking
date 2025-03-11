@@ -15,6 +15,10 @@ def get_user_by_email(email: str) -> UserModel:
         raise UserDoesNotExist()
 
 
+def get_user_by_security_token(security_token: UUID | str) -> UserModel:
+    return User.objects.get(security_token=security_token)
+
+
 def get_user_by_security_token_and_email(security_token: UUID | str, email: str) -> UserModel:
     try:
         user = User.objects.get(security_token=security_token, email=email)

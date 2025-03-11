@@ -8,7 +8,12 @@ from django.utils.timezone import now, timedelta
 from shared.exceptions import DjBookingAPIError
 from users.exceptions import RegistrationTimePassed
 from users.models import User as UserModel
-from users.selectors import get_user_by_email, get_user_by_id_and_security_token, get_user_by_security_token_and_email
+from users.selectors import (
+    get_user_by_email,
+    get_user_by_id_and_security_token,
+    get_user_by_security_token,
+    get_user_by_security_token_and_email,
+)
 from users.tasks import (
     delete_unregistered_user_after_security_token_expired,
     send_change_password_link,
@@ -70,3 +75,10 @@ def send_change_email_link(user: UserModel, new_email: str) -> None:
     user.security_token = security_token
     user.save()
     send_change_email_link.delay(new_email, str(security_token))
+
+
+def change_email(security_token: UUID, new_email: str) -> None:
+    user = get_user_by_security_token(security_token)
+    user.email = new_email
+    user.security_token = ""
+    user.save()

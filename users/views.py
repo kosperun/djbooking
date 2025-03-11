@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import TokenViewBase
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
 from users.services import (
+    change_email,
     change_password,
     confirm_registration,
     confirm_reset_password,
@@ -215,3 +216,23 @@ class EmailChangeRequestAPIView(APIView):
         input_serializer.is_valid(raise_exception=True)
         send_change_email_link(user=request.user, **input_serializer.validated_data)
         return Response(status=HTTP_202_ACCEPTED)
+
+
+class EmailChangeConfirmAPIView(APIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    class InputSerializer(serializers.Serializer):
+        security_token = serializers.UUIDField()
+        new_email = serializers.EmailField()
+
+    @extend_schema(
+        request=InputSerializer,
+        responses={200: None},
+        summary="Confirm change email",
+    )
+    def post(self, request):
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        change_email(**input_serializer.validated_data)
+        return Response(status=HTTP_200_OK)

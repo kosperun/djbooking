@@ -5,12 +5,24 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_205_RESET_CONTENT
 from rest_framework.views import APIView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenViewBase
 
 from users.exceptions import MissingTokenOrEmail
 from users.selectors import get_user_by_security_token_and_email
+from users.serializers import (
+    EmailChangeConfirmInputSerializer,
+    EmailChangeRequestInputSerializer,
+    PasswordChangeInputSerializer,
+    PasswordResetConfirmInputSerializer,
+    SendForgotPasswordLinkInputSerializer,
+    UserLoginOutputSerializer,
+    UserRegistrationConfirmInputSerializer,
+    UserRetrieveUpdateInputSerializer,
+    UserRetrieveUpdateOutputSerializer,
+    UserSingUpInputSerializer,
+    UserSingUpOutputSerializer,
+)
 from users.services import (
     change_email,
     change_password,
@@ -27,14 +39,6 @@ class UserSingUpAPIView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    class UserSingUpInputSerializer(serializers.Serializer):
-        email = serializers.EmailField()
-        password = serializers.CharField()
-
-    class UserSingUpOutputSerializer(serializers.Serializer):
-        id = serializers.UUIDField()
-        email = serializers.EmailField()
-
     @extend_schema(
         request=UserSingUpInputSerializer,
         responses={
@@ -48,10 +52,10 @@ class UserSingUpAPIView(APIView):
         is_user = "Do you plan to rent listed properties?"\n
         is_partner = "Do you plan to list property for rent?"
         """
-        incoming_data = self.UserSingUpInputSerializer(data=request.data)
+        incoming_data = UserSingUpInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
         user = user_create(**incoming_data.validated_data, is_active=False)
-        output_serializer = self.UserSingUpOutputSerializer(user)
+        output_serializer = UserSingUpOutputSerializer(user)
         return Response(output_serializer.data, status=HTTP_201_CREATED)
 
 
@@ -99,10 +103,6 @@ class UserRegistrationConfirmAPIView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    class UserRegistrationConfirmInputSerializer(serializers.Serializer):
-        user_id = serializers.UUIDField()
-        security_token = serializers.UUIDField()
-
     @extend_schema(
         request=UserRegistrationConfirmInputSerializer,
         responses={
@@ -112,22 +112,13 @@ class UserRegistrationConfirmAPIView(APIView):
         summary="Confirm registration",
     )
     def post(self, request):
-        incoming_data = self.UserRegistrationConfirmInputSerializer(data=request.data)
+        incoming_data = UserRegistrationConfirmInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
         confirm_registration(**incoming_data.validated_data)
         return Response(status=HTTP_200_OK)
 
 
 class UserLoginAPIView(TokenViewBase):
-    class UserLoginOutputSerializer(TokenObtainPairSerializer):
-        def validate(self, attrs):
-            data = super().validate(attrs)
-            data["username"] = self.user.full_name
-            data["user_id"] = self.user.id
-            data["is_user"] = self.user.is_user
-            data["is_partner"] = self.user.is_partner
-            return data
-
     serializer_class = UserLoginOutputSerializer
 
 
@@ -139,10 +130,6 @@ class BlacklistRefreshView(APIView):
 
 
 class PasswordChangeAPIView(APIView):
-    class PasswordChangeInputSerializer(serializers.Serializer):
-        old_password = serializers.CharField()
-        new_password = serializers.CharField()
-
     @extend_schema(
         request=PasswordChangeInputSerializer,
         responses={
@@ -152,7 +139,7 @@ class PasswordChangeAPIView(APIView):
         summary="Change password",
     )
     def patch(self, request):
-        input_serializer = self.PasswordChangeInputSerializer(data=request.data)
+        input_serializer = PasswordChangeInputSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         change_password(user=request.user, **input_serializer.validated_data)
         return Response(status=HTTP_200_OK)
@@ -161,9 +148,6 @@ class PasswordChangeAPIView(APIView):
 class SendForgotPasswordLinkAPIView(APIView):
     permission_classes = ()
     authentication_classes = ()
-
-    class SendForgotPasswordLinkInputSerializer(serializers.Serializer):
-        email = serializers.EmailField()
 
     @extend_schema(
         request=SendForgotPasswordLinkInputSerializer,
@@ -174,7 +158,7 @@ class SendForgotPasswordLinkAPIView(APIView):
         summary="Send forgot password link",
     )
     def post(self, request):
-        incoming_data = self.SendForgotPasswordLinkInputSerializer(data=request.data)
+        incoming_data = SendForgotPasswordLinkInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
         send_forgot_password_link(**incoming_data.validated_data)
         return Response(status=HTTP_202_ACCEPTED)
@@ -192,11 +176,6 @@ class PasswordResetConfirmAPIView(APIView):
     permission_classes = ()
     authentication_classes = ()
 
-    class PasswordResetConfirmInputSerializer(serializers.Serializer):
-        security_token = serializers.UUIDField()
-        email = serializers.EmailField()
-        new_password = serializers.CharField()
-
     @extend_schema(
         request=PasswordResetConfirmInputSerializer,
         responses={
@@ -206,23 +185,20 @@ class PasswordResetConfirmAPIView(APIView):
         summary="Confirm resetting password after forgetting",
     )
     def post(self, request):
-        incoming_data = self.PasswordResetConfirmInputSerializer(data=request.data)
+        incoming_data = PasswordResetConfirmInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
         confirm_reset_password(**incoming_data.validated_data)
         return Response(status=HTTP_200_OK)
 
 
 class EmailChangeRequestAPIView(APIView):
-    class EmailChangeRequestInputSerializer(serializers.Serializer):
-        new_email = serializers.EmailField()
-
     @extend_schema(
         request=EmailChangeRequestInputSerializer,
         responses={202: None},
         summary="Send a link to new email",
     )
     def post(self, request):
-        input_serializer = self.EmailChangeRequestInputSerializer(data=request.data)
+        input_serializer = EmailChangeRequestInputSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         send_change_email_link(user=request.user, **input_serializer.validated_data)
         return Response(status=HTTP_202_ACCEPTED)
@@ -232,17 +208,13 @@ class EmailChangeConfirmAPIView(APIView):
     permission_classes = ()
     authentication_classes = ()
 
-    class EmailChangeConfirmInputSerializer(serializers.Serializer):
-        security_token = serializers.UUIDField()
-        new_email = serializers.EmailField()
-
     @extend_schema(
         request=EmailChangeConfirmInputSerializer,
         responses={200: None},
         summary="Confirm change email",
     )
     def post(self, request):
-        input_serializer = self.EmailChangeConfirmInputSerializer(data=request.data)
+        input_serializer = EmailChangeConfirmInputSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         change_email(**input_serializer.validated_data)
         return Response(status=HTTP_200_OK)
@@ -250,30 +222,6 @@ class EmailChangeConfirmAPIView(APIView):
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     http_method_names = ["get", "patch"]  # Remove PUT from RetrieveUpdateAPIView
-
-    class UserRetrieveUpdateInputSerializer(serializers.Serializer):
-        username = serializers.CharField(required=False)
-        first_name = serializers.CharField(required=False)
-        last_name = serializers.CharField(required=False)
-        phone_number = serializers.CharField(required=False)
-        date_of_birth = serializers.DateField(required=False)
-        nationality = serializers.CharField(required=False)
-        gender = serializers.CharField(required=False)
-
-    class UserRetrieveUpdateOutputSerializer(serializers.Serializer):
-        id = serializers.UUIDField()
-        email = serializers.EmailField()
-        username = serializers.CharField()
-        first_name = serializers.CharField()
-        last_name = serializers.CharField()
-        phone_number = serializers.CharField()
-        date_of_birth = serializers.DateField()
-        nationality = serializers.CharField()
-        gender = serializers.CharField()
-        is_superuser = serializers.BooleanField()
-        is_staff = serializers.BooleanField()
-        is_user = serializers.BooleanField()
-        is_partner = serializers.BooleanField()
 
     @extend_schema(
         request=None,
@@ -289,7 +237,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         """
         Allow a user to retrieve their own profile.
         """
-        output_serializer = self.UserRetrieveUpdateOutputSerializer(request.user)
+        output_serializer = UserRetrieveUpdateOutputSerializer(request.user)
         return Response(output_serializer.data, status=HTTP_200_OK)
 
     @extend_schema(
@@ -303,8 +251,8 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         summary="Update my details",
     )
     def patch(self, request):
-        incoming_data = self.UserRetrieveUpdateInputSerializer(data=request.data)
+        incoming_data = UserRetrieveUpdateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
         user = update_user(user=request.user, **incoming_data.validated_data)
-        output_serializer = self.UserRetrieveUpdateOutputSerializer(user)
+        output_serializer = UserRetrieveUpdateOutputSerializer(user)
         return Response(output_serializer.data, status=HTTP_200_OK)

@@ -63,7 +63,7 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = ["users"]
+LOCAL_APPS = ["users", "properties"]
 
 INSTALLED_APPS = DJANGO_CORE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
@@ -105,7 +105,7 @@ DATABASES = {
         "NAME": env.str("DB_NAME"),
         "USER": env.str("DB_USER"),
         "PASSWORD": env.str("DB_PASSWORD"),
-        "HOST": env.str("DB_HOST"),
+        "HOST": env.str("DB_HOST", default="127.0.0.1"),
         "PORT": env.str("DB_PORT", default="5432"),
         "ATOMIC_REQUESTS": True,
     }
@@ -196,7 +196,7 @@ EMAIL_SERVICE = env.str("EMAIL_SERVICE", default="shared.email_service.DummyEmai
 
 
 # CELERY SETTINGS
-CELERY_BROKER_URL = env.str("CELERY_BROKER_URL")
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", default="redis://localhost/0")
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 

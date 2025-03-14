@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 
-class IsPartner(BasePermission):
+class IsPartnerUser(BasePermission):
     """
     Allows access only to partner users.
     """

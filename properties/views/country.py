@@ -15,12 +15,13 @@ from properties.serializers import (
     CountryUpdateInputSerializer,
 )
 from properties.services import country_create, country_delete, country_update
+from shared.permissions import IsStaffUser
 
 
 class CountryViewSet(ViewSet):
     """ViewSet for countries API."""
 
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, IsStaffUser)
 
     @extend_schema(
         request=CountryCreateInputSerializer,
@@ -34,7 +35,7 @@ class CountryViewSet(ViewSet):
         """Create a country."""
         incoming_data = CountryCreateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
-        country = country_create(actor=request.user, **incoming_data.validated_data)
+        country = country_create(**incoming_data.validated_data)
         output_serializer = CountryOutputSerializer(country)
         return Response(data=output_serializer.data, status=HTTP_201_CREATED)
 
@@ -55,7 +56,7 @@ class CountryViewSet(ViewSet):
     )
     def retrieve(self, request, pk):
         """Get a country's details."""
-        country = country_retrieve(actor=request.user, country_id=pk)
+        country = country_retrieve(country_id=pk)
         output_serializer = CountryOutputSerializer(country)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -68,7 +69,7 @@ class CountryViewSet(ViewSet):
     )
     def list(self, request):
         """List all countries."""
-        countries = country_get_paginated_list(actor=request.user, query_params=request.query_params)
+        countries = country_get_paginated_list(query_params=request.query_params)
         output_serializer = CountryPaginatedOutputSerializer(countries)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -91,7 +92,7 @@ class CountryViewSet(ViewSet):
         """Update a country's details."""
         incoming_data = CountryUpdateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
-        country = country_update(actor=request.user, country_id=pk, **incoming_data.validated_data)
+        country = country_update(country_id=pk, **incoming_data.validated_data)
         output_serializer = CountryOutputSerializer(country)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -112,5 +113,5 @@ class CountryViewSet(ViewSet):
     )
     def destroy(self, request, pk):
         """Delete a country."""
-        country_delete(actor=request.user, country_id=pk)
+        country_delete(country_id=pk)
         return Response(status=HTTP_204_NO_CONTENT)

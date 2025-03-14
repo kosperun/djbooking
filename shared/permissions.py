@@ -1,7 +1,4 @@
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
-
-from users.models import User
 
 
 class IsPartner(BasePermission):
@@ -13,11 +10,10 @@ class IsPartner(BasePermission):
         return request.user and hasattr(request.user, "is_partner") and request.user.is_partner
 
 
-def check_staff_permissions(actor: User) -> None:
-    if not actor.is_staff:
-        raise PermissionDenied()
+class IsStaffUser(BasePermission):
+    """
+    Allows access only to staff users.
+    """
 
-
-def check_partner_permissions(actor: User) -> None:
-    if not actor.is_partner:
-        raise PermissionDenied()
+    def has_permission(self, request, view):
+        return request.user and hasattr(request.user, "is_staff") and request.user.is_staff

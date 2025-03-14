@@ -15,12 +15,13 @@ from properties.serializers import (
     CityUpdateInputSerializer,
 )
 from properties.services import city_create, city_delete, city_update
+from shared.permissions import IsStaffUser
 
 
 class CityViewSet(ViewSet):
     """ViewSet for the cities APIs."""
 
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, IsStaffUser)
 
     @extend_schema(
         parameters=[OpenApiParameter(name="country_id", type=OpenApiTypes.STR, location=OpenApiParameter.PATH)],
@@ -35,7 +36,7 @@ class CityViewSet(ViewSet):
         """Create a new city."""
         incoming_data = CityCreateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
-        city = city_create(actor=request.user, country_id=country_pk, **incoming_data.validated_data)
+        city = city_create(country_id=country_pk, **incoming_data.validated_data)
         output_serializer = CityOutputSerializer(city)
         return Response(data=output_serializer.data, status=HTTP_201_CREATED)
 
@@ -53,7 +54,7 @@ class CityViewSet(ViewSet):
     )
     def retrieve(self, request, country_pk, pk):  # pylint:disable=unused-argument
         """Get city's details."""
-        city = city_retrieve(actor=request.user, city_id=pk)
+        city = city_retrieve(city_id=pk)
         output_serializer = CityOutputSerializer(city)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -73,7 +74,7 @@ class CityViewSet(ViewSet):
         """Update a city's details."""
         incoming_data = CityUpdateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
-        city = city_update(actor=request.user, city_id=pk, **incoming_data.validated_data)
+        city = city_update(city_id=pk, **incoming_data.validated_data)
         output_serializer = CityOutputSerializer(city)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -91,7 +92,7 @@ class CityViewSet(ViewSet):
     )
     def list(self, request, country_pk):
         """List all cities in a country."""
-        cities = city_get_paginated_list(actor=request.user, country_id=country_pk, query_params=request.query_params)
+        cities = city_get_paginated_list(country_id=country_pk, query_params=request.query_params)
         output_serializer = CityListPaginatedOutputSerializer(cities)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
 
@@ -111,5 +112,5 @@ class CityViewSet(ViewSet):
         """Delete a city."""
         incoming_data = CityUpdateInputSerializer(data=request.data)
         incoming_data.is_valid(raise_exception=True)
-        city_delete(actor=request.user, city_id=pk)
+        city_delete(city_id=pk)
         return Response(status=HTTP_204_NO_CONTENT)

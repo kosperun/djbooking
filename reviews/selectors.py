@@ -1,8 +1,6 @@
 from typing import Union
 from uuid import UUID
 
-from django.db.models import QuerySet
-
 from reviews.models import Review
 from shared.utils import paginate_queryset, sort_queryset
 from users.models import User
@@ -12,18 +10,10 @@ def review_retrieve(review_id: UUID) -> Review:
     return Review.objects.get(id=review_id)
 
 
-def review_get_list_by_property(property_id: UUID) -> QuerySet[Review]:
-    return Review.objects.filter(property__id=property_id)
-
-
 def review_get_paginated_list_by_property(property_id: UUID, query_params: dict) -> dict[str, Union[int, list[Review]]]:
-    reviews = review_get_list_by_property(property_id)
+    reviews = Review.objects.filter(property__id=property_id)
     sorted_reviews = sort_queryset(reviews, query_params)
     return paginate_queryset(sorted_reviews, query_params)
-
-
-def review_retrieve_my(review_id: UUID) -> Review:
-    return Review.objects.get(id=review_id)
 
 
 def review_get_paginated_list_by_user(user: User, query_params: dict) -> dict[str, Union[int, list[Review]]]:

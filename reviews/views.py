@@ -7,13 +7,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.viewsets import ViewSet
 
-from properties.selectors import (
-    review_get_paginated_list_by_property,
-    review_get_paginated_list_by_user,
-    review_retrieve,
-    review_retrieve_my,
-)
-from properties.serializers import (
+from reviews.selectors import review_get_paginated_list_by_property, review_get_paginated_list_by_user, review_retrieve
+from reviews.serializers import (
     MyReviewCreateInputSerializer,
     MyReviewOutputSerializer,
     MyReviewsPaginatedListOutputSerializer,
@@ -21,7 +16,7 @@ from properties.serializers import (
     ReviewOutputSerializer,
     ReviewPaginatedListOutputSerializer,
 )
-from properties.services import review_create, review_delete, review_update
+from reviews.services import review_create, review_delete, review_update
 
 
 class ReviewViewSet(ViewSet):
@@ -66,7 +61,7 @@ class MyReviewViewSet(ViewSet):
 
     def _get_and_check_review(self, request, review_id):
         """Retrieve a review and check if the user has permission."""
-        review = review_retrieve_my(review_id=review_id)
+        review = review_retrieve(review_id=review_id)
         if review.user != request.user:
             raise PermissionDenied()
         return review

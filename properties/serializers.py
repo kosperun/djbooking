@@ -151,22 +151,3 @@ class PropertyListOutputSerializer(PropertyOutputSerializer):
 class PropertyListPaginatedOutputSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     results = PropertyListOutputSerializer(many=True)
-
-
-class UserReviewOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
-    first_name = serializers.CharField()
-    nationality = serializers.CharField()
-
-
-class ReviewOutputSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
-    user = UserReviewOutputSerializer()
-    text = serializers.CharField()
-    score = serializers.IntegerField()
-    created = serializers.DateTimeField()
-
-
-class ReviewPaginatedListOutputSerializer(serializers.Serializer):
-    count = serializers.IntegerField()
-    results = ReviewOutputSerializer(many=True)

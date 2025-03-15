@@ -63,7 +63,7 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = ["users", "properties", "bookings"]
+LOCAL_APPS = ["users", "properties", "bookings", "reviews"]
 
 INSTALLED_APPS = DJANGO_CORE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [

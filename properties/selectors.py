@@ -5,7 +5,7 @@ from uuid import UUID
 from django.db.models import Avg, Case, Q, QuerySet, Value, When
 from django.db.models.functions import Round
 
-from properties.models import City, Country, Property
+from properties.models import City, Country, Property, Review
 from shared.utils import paginate_queryset, sort_queryset
 
 if TYPE_CHECKING:
@@ -115,3 +115,17 @@ def property_get_paginated_filtered_list(query_params: dict) -> dict[str, Union[
     properties = property_get_filtered_list(query_params)
     sorted_properties = sort_queryset(properties, query_params)
     return paginate_queryset(sorted_properties, query_params)
+
+
+def review_retrieve(review_id: UUID) -> Review:
+    return Review.objects.get(id=review_id)
+
+
+def review_get_list_by_property(property_id: UUID) -> QuerySet[Review]:
+    return Review.objects.filter(property__id=property_id)
+
+
+def review_get_paginated_list_by_property(property_id: UUID, query_params: dict) -> dict[str, Union[int, list[Review]]]:
+    reviews = review_get_list_by_property(property_id)
+    sorted_reviews = sort_queryset(reviews, query_params)
+    return paginate_queryset(sorted_reviews, query_params)

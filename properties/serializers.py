@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 
 
@@ -59,7 +61,7 @@ class PropertyCreateInputSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
     district = serializers.CharField(required=False)
-    price = serializers.DecimalField(max_digits=7, decimal_places=2, min_value=0)
+    price = serializers.DecimalField(max_digits=7, decimal_places=2, min_value=Decimal("0"))
 
 
 class PropertyUpdateInputSerializer(serializers.Serializer):
@@ -71,7 +73,7 @@ class PropertyUpdateInputSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
     district = serializers.CharField(required=False)
-    price = serializers.DecimalField(max_digits=7, decimal_places=2, min_value=0, required=False)
+    price = serializers.DecimalField(max_digits=7, decimal_places=2, min_value=Decimal("0"), required=False)
 
 
 class PropertyCountryOutputSerializer(serializers.Serializer):
@@ -149,3 +151,22 @@ class PropertyListOutputSerializer(PropertyOutputSerializer):
 class PropertyListPaginatedOutputSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     results = PropertyListOutputSerializer(many=True)
+
+
+class UserReviewOutputSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    first_name = serializers.CharField()
+    nationality = serializers.CharField()
+
+
+class ReviewOutputSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    user = UserReviewOutputSerializer()
+    text = serializers.CharField()
+    score = serializers.IntegerField()
+    created = serializers.DateTimeField()
+
+
+class ReviewPaginatedListOutputSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    results = ReviewOutputSerializer(many=True)

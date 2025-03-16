@@ -22,7 +22,7 @@ def send_change_password_link(email: str, security_token: str):
 
 
 @celery_app.task
-def send_change_email_link_task(new_email: str, security_token: str):
+def send_change_email_link(new_email: str, security_token: str):
     params = {"email": new_email, "token": security_token}
     link = f"{settings.DOMAIN}/change-email?{urlencode(params)}"
     return EmailService.send_change_email_link(email=new_email, link=link)

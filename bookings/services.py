@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Union
 from uuid import UUID
 
 from django.conf import settings
@@ -16,6 +17,13 @@ from bookings.exceptions import (
 from bookings.models import Booking
 from bookings.payment_provider import create_payment_intent, create_refund
 from bookings.selectors import booking_retrieve
+from bookings.tasks import (
+    delete_expired_unpaid_booking,
+    send_booking_cancellation_email_to_owner,
+    send_booking_cancellation_email_to_user,
+    send_booking_confirmation_email_to_owner,
+    send_booking_confirmation_email_to_user,
+)
 from properties.selectors import property_retrieve
 from users.models import User
 
@@ -80,7 +88,7 @@ def _validate_booking_for_payment(booking: Booking, user: User) -> None:
     if user != booking.user:
         raise PermissionDenied()
     if booking.payment_expiration_time < now():
-        # delete_expired_unpaid_booking.delay(str(booking.id))
+        delete_expired_unpaid_booking.delay(str(booking.id))
         raise PaymentExpirationTimePassed()
 
 
@@ -89,8 +97,8 @@ def booking_confirm(metadata: dict) -> None:
     booking = booking_retrieve(metadata["booking_id"])
     booking.status = Booking.Status.PAID
     booking.save()
-    # send_booking_confirmation_email_to_user_task.delay(str(booking.id))
-    # send_booking_confirmation_email_to_owner_task.delay(str(booking.id))
+    send_booking_confirmation_email_to_user.delay(str(booking.id))
+    send_booking_confirmation_email_to_owner.delay(str(booking.id))
 
 
 def booking_cancel(user: User, booking_id: UUID) -> Booking:
@@ -108,8 +116,8 @@ def booking_cancel(user: User, booking_id: UUID) -> Booking:
     )
     booking.status = Booking.Status.CANCELED
     booking.save()
-    # send_booking_cancellation_email_to_owner_task.delay(str(booking.id))
-    # send_booking_cancellation_email_to_user_task.delay(str(booking.id))
+    send_booking_cancellation_email_to_owner.delay(str(booking.id))
+    send_booking_cancellation_email_to_user.delay(str(booking.id))
     return booking
 
 
@@ -118,3 +126,8 @@ def _validate_booking_for_cancellation(user: User, booking: Booking) -> Booking:
         raise PermissionDenied()
     if booking.status != Booking.Status.PAID:
         raise BookingCannotBeCanceledError()
+
+
+def booking_delete(booking_id: Union[UUID, str]) -> tuple:
+    booking = booking_retrieve(booking_id)
+    return booking.delete()

@@ -27,6 +27,63 @@ class BaseEmailService(ABC):
     def send_change_email_link(self, *, email: str, link: str):
         pass
 
+    @abstractmethod
+    def send_booking_confirmation_email_to_user(
+        self,
+        *,
+        email: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        pass
+
+    @abstractmethod
+    def send_booking_confirmation_email_to_owner(
+        self,
+        *,
+        email: str,
+        owner_name: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        pass
+
+    @abstractmethod
+    def send_booking_cancellation_email_to_user(
+        self,
+        *,
+        email: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+    ):
+        pass
+
+    @abstractmethod
+    def send_booking_cancellation_email_to_owner(
+        self,
+        *,
+        email: str,
+        owner_name: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        pass
+
 
 class DummyEmailService(BaseEmailService):
     """Dummy EmailService class"""
@@ -45,6 +102,59 @@ class DummyEmailService(BaseEmailService):
 
     def send_change_email_link(self, *, email: str, link: str):
         print("Email to reset email sent!")
+
+    def send_booking_confirmation_email_to_user(
+        self,
+        *,
+        email: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        print("Booking confirmation sent!")
+
+    def send_booking_confirmation_email_to_owner(
+        self,
+        *,
+        email: str,
+        owner_name: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        print("Booking confirmation sent!")
+
+    def send_booking_cancellation_email_to_user(
+        self,
+        *,
+        email: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+    ):
+        print("Booking cancellation sent!")
+
+    def send_booking_cancellation_email_to_owner(
+        self,
+        *,
+        email: str,
+        owner_name: str,
+        username: str,
+        lodging_name: str,
+        city: str,
+        date_from: str,
+        date_to: str,
+        reference_code: str,
+    ):
+        print("Booking cancellation sent!")
 
 
 EmailService = import_string(settings.EMAIL_SERVICE)()

@@ -1,7 +1,9 @@
 """Bookings views (APIs)"""
 
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
+from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
@@ -12,8 +14,9 @@ from bookings.serializers import (
     BookingCreateInputSerializer,
     BookingListPaginatedOutputSerializer,
     BookingOutputSerializer,
+    BookingPayInputSerializer,
 )
-from bookings.services import booking_create
+from bookings.services import booking_cancel, booking_create, booking_pay
 from shared.permissions import IsStaffUser
 
 
@@ -188,3 +191,36 @@ class MyBookingViewSet(ViewSet):
         bookings = booking_get_paginated_list_by_user(user=request.user, query_params=request.query_params)
         output_serializer = BookingListPaginatedOutputSerializer(bookings)
         return Response(data=output_serializer.data, status=HTTP_200_OK)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", type=OpenApiTypes.UUID, location=OpenApiParameter.PATH)],
+        request=BookingPayInputSerializer,
+        responses={
+            201: inline_serializer(name="pay_for_booking", fields={"client_secret": serializers.CharField()}),
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Pay for booking",
+    )
+    @action(detail=True, methods=["post"])
+    def pay(self, request, pk):
+        """Pay for booking."""
+        input_serializer = BookingPayInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        client_secret = booking_pay(user=request.user, booking_id=pk, **input_serializer.validated_data)
+        return Response({"client_secret": client_secret}, status=HTTP_201_CREATED)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("id", type=OpenApiTypes.UUID, location=OpenApiParameter.PATH)],
+        request=None,
+        responses={
+            200: BookingOutputSerializer,
+            400: OpenApiResponse(description="Bad request"),
+        },
+        summary="Cancel a booking",
+    )
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk):
+        """Cancel one's own booking."""
+        booking = booking_cancel(user=request.user, booking_id=pk)
+        output_serializer = BookingOutputSerializer(booking)
+        return Response(output_serializer.data, status=HTTP_200_OK)

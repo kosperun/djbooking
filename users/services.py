@@ -5,8 +5,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now, timedelta
 
+from bookings.payment_provider import create_payment_user_with_email
 from shared.exceptions import DjBookingAPIError
 from users.exceptions import RegistrationTimePassed
+from users.models import PaymentUser
 from users.models import User as UserModel
 from users.selectors import (
     get_user_by_email,
@@ -44,6 +46,8 @@ def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
     user.security_token = ""
     user.is_active = True
     user.save()
+    payment_customer = create_payment_user_with_email(email=user.email)
+    PaymentUser.objects.create(user=user, customer_id=payment_customer.id)
     return user
 
 

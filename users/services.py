@@ -17,8 +17,9 @@ from users.selectors import (
 )
 from users.tasks import (
     delete_unregistered_user_after_security_token_expired,
-    send_change_password_link,
-    send_confirmation_link,
+    send_change_email_link_task,
+    send_change_password_link_task,
+    send_confirmation_link_task,
 )
 
 User = get_user_model()
@@ -31,7 +32,7 @@ def user_create(**kwargs) -> UserModel:
     user.set_password(password)
     user.security_token_expiration_time = now() + timedelta(hours=settings.SECURITY_TOKEN_LIFE_TIME_IN_HOURS)
     user.save()
-    send_confirmation_link.delay(user.email, user.security_token)
+    send_confirmation_link_task.delay(user.email, user.security_token)
     return user
 
 
@@ -65,7 +66,7 @@ def send_forgot_password_link(email: str) -> None:
     security_token = uuid4()
     user.security_token = security_token
     user.save()
-    send_change_password_link.delay(user.email, str(security_token))
+    send_change_password_link_task.delay(user.email, str(security_token))
 
 
 def confirm_reset_password(security_token: UUID, email: str, new_password: str) -> None:
@@ -78,8 +79,11 @@ def confirm_reset_password(security_token: UUID, email: str, new_password: str) 
 def send_change_email_link(user: UserModel, new_email: str) -> None:
     security_token = uuid4()
     user.security_token = security_token
+    print(f"BEFORE SAVE: {user.security_token=}")
     user.save()
-    send_change_email_link.delay(new_email, str(security_token))
+    user.refresh_from_db()  # <- Force reload from DB
+    print(f"AFTER SAVE: {user.security_token=}")  # Check if it saved
+    send_change_email_link_task.delay(new_email, str(security_token))
 
 
 def change_email(security_token: UUID, new_email: str) -> None:

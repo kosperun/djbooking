@@ -106,7 +106,7 @@ def booking_cancel(user: User, booking_id: UUID) -> Booking:
 
     Raises:
         PermissionDenied: If user is not the same who created booking.
-        DjLodgingValidationError: If booking has not been paid for or has already been canceled
+        BookingCannotBeCanceledError: If booking has not been paid for or has already been canceled
     """
     booking = booking_retrieve(booking_id)
     _validate_booking_for_cancellation(user, booking)

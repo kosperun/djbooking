@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now, timedelta
 
-from bookings.payment_provider import create_payment_user_with_email
 from shared.exceptions import DjBookingAPIError
 from users.exceptions import RegistrationTimePassed
 from users.models import PaymentUser
@@ -37,6 +36,8 @@ def user_create(**kwargs) -> UserModel:
 
 
 def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
+    from bookings.payment_provider import create_payment_user_with_email
+
     user = get_user_by_id_and_security_token(user_id, security_token)
 
     if user.security_token_expiration_time < now():

@@ -79,10 +79,8 @@ def confirm_reset_password(security_token: UUID, email: str, new_password: str) 
 def send_change_email_link(user: UserModel, new_email: str) -> None:
     security_token = uuid4()
     user.security_token = security_token
-    print(f"BEFORE SAVE: {user.security_token=}")
     user.save()
-    user.refresh_from_db()  # <- Force reload from DB
-    print(f"AFTER SAVE: {user.security_token=}")  # Check if it saved
+    user.refresh_from_db()
     send_change_email_link_task.delay(new_email, str(security_token))
 
 

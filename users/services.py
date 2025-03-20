@@ -48,9 +48,7 @@ def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
     user.is_active = True
     user.save()
     payment_customer = create_stripe_customer_with_email(email=user.email)
-    print("!!!!!!!!!!")
     PaymentUser.objects.create(user=user, customer_id=payment_customer.id)
-    print(">>>>>>>>>>")
     return user
 
 

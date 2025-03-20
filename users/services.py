@@ -37,7 +37,7 @@ def user_create(**kwargs) -> UserModel:
 
 
 def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
-    from bookings.payment_provider import create_payment_user_with_email
+    from payments.services import create_stripe_customer_with_email
 
     user = get_user_by_id_and_security_token(user_id, security_token)
 
@@ -48,7 +48,7 @@ def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
     user.security_token = ""
     user.is_active = True
     user.save()
-    payment_customer = create_payment_user_with_email(email=user.email)
+    payment_customer = create_stripe_customer_with_email(email=user.email)
     PaymentUser.objects.create(user=user, customer_id=payment_customer.id)
     return user
 

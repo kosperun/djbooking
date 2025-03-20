@@ -59,7 +59,6 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
     "django_filters",
     "silk",
-    "djstripe",
     "django_celery_beat",
 ]
 
@@ -202,8 +201,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # PAYMENT SETTINGS
 # PAYMENT_PROVIDER = "djlodging.infrastructure.providers.payments.StripePaymentProvider"
+STRIPE_API_KEY = env.str("STRIPE_API_KEY")
+STRIPE_WEBHOOK_SECRET = env.str("STRIPE_WEBHOOK_SECRET")
 STRIPE_LIVE_MODE = False  # Change to True in production
-# DJSTRIPE_WEBHOOK_SECRET = env.str("DJSTRIPE_WEBHOOK_SECRET")
-DJSTRIPE_USE_NATIVE_JSONFIELD = True  # We recommend setting to True for new installations
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 BOOKING_PAYMENT_EXPIRATION_TIME_IN_MINUTES = env.int("BOOKING_PAYMENT_EXPIRATION_TIME_IN_MINUTES", default=15)

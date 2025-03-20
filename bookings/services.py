@@ -10,12 +10,9 @@ from bookings.exceptions import (
     BookingCannotBeCanceledError,
     EndDateBeforeStartDateError,
     PastDateError,
-    PaymentExpirationTimePassed,
-    PaymentsUserMissingError,
     PropertyAlreadyBookedError,
 )
 from bookings.models import Booking
-from bookings.payment_provider import create_payment_intent, create_refund
 from bookings.selectors import booking_retrieve
 from bookings.tasks import (
     delete_expired_unpaid_booking,
@@ -24,6 +21,7 @@ from bookings.tasks import (
     send_booking_confirmation_email_to_owner,
     send_booking_confirmation_email_to_user,
 )
+from payments.exceptions import PaymentExpirationTimePassed, PaymentsUserMissingError
 from properties.selectors import property_retrieve
 from users.models import User
 
@@ -65,6 +63,8 @@ def booking_pay(user, booking_id: UUID, currency: str = "usd", capture_method: s
         the user who created booking.
     PaymentExpirationTimePassed: If the time for payment has passed.
     """
+    from payments.services import create_payment_intent
+
     booking = booking_retrieve(booking_id)
     _validate_booking_for_payment(booking, user)
 
@@ -108,11 +108,15 @@ def booking_cancel(user: User, booking_id: UUID) -> Booking:
         PermissionDenied: If user is not the same who created booking.
         BookingCannotBeCanceledError: If booking has not been paid for or has already been canceled
     """
+    from payments.services import create_refund
+
     booking = booking_retrieve(booking_id)
     _validate_booking_for_cancellation(user, booking)
 
     create_refund(
-        payment_intent_id=booking.payment_intent_id, amount=booking.lodging.price, metadata={"booking_id": booking.id}
+        payment_intent_id=booking.payment_intent_id,
+        amount=booking.lodging.price,
+        metadata={"booking_id": booking.id},
     )
     booking.status = Booking.Status.CANCELED
     booking.save()

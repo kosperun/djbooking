@@ -23,6 +23,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.router import urlpatterns as api_urlpatterns
+from payments.views import StripeWebhooksAPIView
 from users.views import BlacklistRefreshView, UserLoginAPIView
 
 urlpatterns = [
@@ -32,6 +33,7 @@ urlpatterns = [
     path("api/login/", UserLoginAPIView.as_view(), name="login"),
     path("api/logout/", BlacklistRefreshView.as_view(), name="logout"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/payments/webhook/", StripeWebhooksAPIView.as_view(), name="payments"),
     path("api/", include(api_urlpatterns)),
     # Swagger
     path("schema/", SpectacularAPIView.as_view(), name="schema"),

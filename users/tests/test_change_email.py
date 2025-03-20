@@ -21,14 +21,14 @@ fake = Faker()
 class TestEmailChangeRequestAPIView:
     url = reverse("users:request-change-email")
 
-    def test_request_email_change_succeeds(self, authenticate_user, mocker):
+    def test_request_email_change_succeeds(self, authenticated_client, mocker):
         user = UserFactory()
         old_email = user.email
         new_email = fake.email()
 
         mock_task = mocker.patch("users.tasks.send_change_email_link_task.delay", return_value=None)
         payload = {"new_email": new_email}
-        client = authenticate_user(user)
+        client = authenticated_client(user)
         response = client.post(self.url, payload)
 
         assert response.status_code == HTTP_202_ACCEPTED
@@ -37,12 +37,12 @@ class TestEmailChangeRequestAPIView:
         assert user.email == old_email
         mock_task.assert_called_once_with(new_email, str(user.security_token))
 
-    def test_request_email_change_without_new_email_fails(self, authenticate_user):
+    def test_request_email_change_without_new_email_fails(self, authenticated_client):
         user = UserFactory()
         old_email = user.email
 
         payload = {}
-        client = authenticate_user(user)
+        client = authenticated_client(user)
         response = client.post(self.url, payload)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
@@ -50,12 +50,12 @@ class TestEmailChangeRequestAPIView:
         user.refresh_from_db()
         assert user.email == old_email
 
-    def test_request_email_change_with_invalid_email_fails(self, authenticate_user):
+    def test_request_email_change_with_invalid_email_fails(self, authenticated_client):
         user = UserFactory()
         old_email = user.email
 
         payload = {"new_email": "email @1.com"}
-        client = authenticate_user(user)
+        client = authenticated_client(user)
         response = client.post(self.url, payload)
 
         assert response.status_code == HTTP_400_BAD_REQUEST

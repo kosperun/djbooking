@@ -15,14 +15,14 @@ fake = Faker()
 class TestPasswordChangeAPIView:
     url = reverse("users:change-password")
 
-    def test_password_change_succeeds(self, authenticate_user):
+    def test_password_change_succeeds(self, authenticated_client):
         old_password = fake.password()
         new_password = fake.password()
         user = UserFactory(password=old_password)
 
         payload = {"old_password": old_password, "new_password": new_password}
 
-        client = authenticate_user(user)
+        client = authenticated_client(user)
         response = client.patch(self.url, payload)
 
         assert response.status_code == HTTP_200_OK
@@ -31,14 +31,14 @@ class TestPasswordChangeAPIView:
         assert user.check_password(old_password) is False
         assert user.check_password(new_password) is True
 
-    def test_password_change_with_wrong_old_password_fails(self, authenticate_user):
+    def test_password_change_with_wrong_old_password_fails(self, authenticated_client):
         old_password = fake.password()
         new_password = fake.password()
         user = UserFactory()
 
         payload = {"old_password": old_password, "new_password": new_password}
 
-        client = authenticate_user(user)
+        client = authenticated_client(user)
         response = client.patch(self.url, payload)
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data["detail"] == "Wrong password!"
@@ -78,7 +78,11 @@ class TestPasswordResetConfirmAPIView:
         user = UserFactory(password=old_password)
         security_token = user.security_token
 
-        payload = {"security_token": security_token, "email": user.email, "new_password": new_password}
+        payload = {
+            "security_token": security_token,
+            "email": user.email,
+            "new_password": new_password,
+        }
         api_client = APIClient()
         response = api_client.post(self.url, payload)
 
@@ -96,7 +100,11 @@ class TestPasswordResetConfirmAPIView:
         security_token = user.security_token
         wrong_security_token = uuid4()
 
-        payload = {"security_token": wrong_security_token, "email": user.email, "new_password": new_password}
+        payload = {
+            "security_token": wrong_security_token,
+            "email": user.email,
+            "new_password": new_password,
+        }
         api_client = APIClient()
         response = api_client.post(self.url, payload)
 
@@ -115,7 +123,11 @@ class TestPasswordResetConfirmAPIView:
         security_token = user.security_token
         wrong_email = fake.email()
 
-        payload = {"security_token": security_token, "email": wrong_email, "new_password": new_password}
+        payload = {
+            "security_token": security_token,
+            "email": wrong_email,
+            "new_password": new_password,
+        }
         api_client = APIClient()
         response = api_client.post(self.url, payload)
 
@@ -135,7 +147,11 @@ class TestPasswordResetConfirmAPIView:
         wrong_security_token = uuid4()
         wrong_email = fake.email()
 
-        payload = {"security_token": wrong_security_token, "email": wrong_email, "new_password": new_password}
+        payload = {
+            "security_token": wrong_security_token,
+            "email": wrong_email,
+            "new_password": new_password,
+        }
         api_client = APIClient()
         response = api_client.post(self.url, payload)
 
@@ -158,7 +174,7 @@ class TestPasswordResetConfirmAPIView:
         response = api_client.post(self.url, payload)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert response.data["security_token"][0] == "This field is required."
+        assert "This field is required." in response.data["security_token"]
 
         user.refresh_from_db()
         assert user.check_password(old_password) is True
@@ -176,7 +192,7 @@ class TestPasswordResetConfirmAPIView:
         response = api_client.post(self.url, payload)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert response.data["email"][0] == "This field is required."
+        assert "This field is required." in response.data["email"]
 
         user.refresh_from_db()
         assert user.check_password(old_password) is True
@@ -193,7 +209,7 @@ class TestPasswordResetConfirmAPIView:
         api_client = APIClient()
         response = api_client.post(self.url, payload)
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert response.data["security_token"][0] == "This field is required."
+        assert "This field is required." in response.data["security_token"]
 
         user.refresh_from_db()
         assert user.check_password(old_password) is True

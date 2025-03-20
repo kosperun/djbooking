@@ -42,7 +42,12 @@ class UserFactory(DjangoModelFactory):
 
 
 @pytest.fixture
-def authenticate_user():
+def api_client():
+    return APIClient()
+
+
+@pytest.fixture
+def authenticated_client():
     def _authenticate(user):
         client = APIClient()
         refresh = RefreshToken.for_user(user)

@@ -9,7 +9,7 @@ Core Frameworks & Libraries
 - `Django Rest Framework (DRF)` & `drf-nested-routers` - for building RESTful APIs
 - `drf-spectacular` - for OpenAPI documentation (`swagger`)
 - `djangorestframework-simplejwt` - JWT authentication
-- `Stripe` & `dj-stripe` - payments processing, refunds and bookkeeping
+- `Stripe` - payments processing, refunds and bookkeeping
 - `Celery` - for asynchronous and scheduled tasks (e.g., email notifications)
 - `Redis` - Celery backend for task management
 - `SendGrid` - email provider

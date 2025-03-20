@@ -14,7 +14,6 @@ drf-spectacular==0.28.0
 psycopg2-binary==2.9.10
 sendgrid==6.11.0
 stripe==11.6.0
-dj-stripe==2.9.0
 coverage-badge==1.1.2
 gunicorn==23.0.0
 celery==5.4.0

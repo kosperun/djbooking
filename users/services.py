@@ -5,9 +5,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.timezone import now, timedelta
 
+from payments.models import PaymentUser
+from payments.services import create_stripe_customer_with_email
 from shared.exceptions import DjBookingAPIError
 from users.exceptions import RegistrationTimePassed
-from users.models import PaymentUser
 from users.models import User as UserModel
 from users.selectors import (
     get_user_by_email,
@@ -37,8 +38,6 @@ def user_create(**kwargs) -> UserModel:
 
 
 def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
-    from payments.services import create_stripe_customer_with_email
-
     user = get_user_by_id_and_security_token(user_id, security_token)
 
     if user.security_token_expiration_time < now():
@@ -49,7 +48,9 @@ def confirm_registration(user_id: UUID, security_token: UUID) -> UserModel:
     user.is_active = True
     user.save()
     payment_customer = create_stripe_customer_with_email(email=user.email)
+    print("!!!!!!!!!!")
     PaymentUser.objects.create(user=user, customer_id=payment_customer.id)
+    print(">>>>>>>>>>")
     return user
 
 
